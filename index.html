@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cutting Book</title>
+<style>
+:root{--bg:#eef1f5;--panel:#fff;--ink:#1e293b;--muted:#64748b;--faint:#94a3b8;--line:#e2e8f0;--line2:#cbd5e1;--accent:#0d9488;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;font-size:15px;line-height:1.4;}
+.wrap{max-width:920px;margin:0 auto;min-height:100vh;}
+header{background:#0f172a;color:#fff;position:sticky;top:0;z-index:20;}
+.hbar{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:13px 16px;}
+.logo{height:34px;width:34px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;}
+h1{font-size:17px;margin:0;font-weight:650;} header p{margin:0;font-size:11px;color:#94a3b8;}
+.ro{margin-left:auto;font-size:11px;color:#94a3b8;text-align:right;}
+main{padding:16px;}
+.in{width:100%;border:1px solid var(--line2);border-radius:9px;padding:10px 12px;background:#fff;font-size:14px;font-family:inherit;}
+.search{position:relative;margin-bottom:12px;}
+.search input{width:100%;padding:10px 12px 10px 34px;border:1px solid var(--line2);border-radius:9px;}
+.search svg{position:absolute;left:10px;top:11px;color:var(--faint);}
+.muted{color:var(--muted);} .faint{color:var(--faint);} .xs{font-size:12px;} .sm{font-size:13px;} .b{font-weight:650;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;box-shadow:0 1px 2px rgba(15,23,42,.04);padding:14px;}
+.sp{display:flex;flex-direction:column;gap:12px;}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--faint);margin:0 0 4px;}
+.bookhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--ink);}
+.bookhead:first-of-type{margin-top:2px;} .bookhead .ti{font-size:15px;font-weight:800;} .bookhead .su{font-size:12px;color:var(--muted);}
+.cbhead{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:9px;margin-bottom:11px;flex-wrap:wrap;}
+.cbhead .dno{font-size:16px;font-weight:700;} .cbhead .dno b{color:var(--accent);}
+.cbhead .party{font-weight:600;font-size:14px;} .cbhead .cdate{font-size:13px;color:var(--muted);}
+.seasonbadge{display:inline-block;font-size:11px;font-weight:700;color:var(--accent);background:#e6fffb;border:1px solid #99f6e4;border-radius:999px;padding:2px 9px;}
+.sizes{flex:1;min-width:120px;color:var(--muted);font-size:13px;}
+.cbcols{display:grid;grid-template-columns:1fr 1.15fr;gap:0;}
+.cbcol{padding:0 12px;} .cbcol:first-child{padding-left:0;} .cbcol.sets{border-left:1px solid var(--line);}
+.frow{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:3px 0;border-bottom:1px dashed var(--line);}
+.frow .fn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .frow .avg{font-weight:700;flex:0 0 auto;}
+.crow{display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:8px;padding:4px 0;}
+.crow .thumb{height:30px;width:30px;border-radius:6px;border:1px solid var(--line);background:#f1f5f9;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.crow .thumb img{height:100%;width:100%;object-fit:cover;} .crow .cn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;} .crow .st{font-weight:800;font-size:15px;}
+.ctotal{display:flex;justify-content:space-between;align-items:center;margin-top:7px;padding-top:7px;border-top:2px solid var(--ink);font-size:13px;} .ctotal b{font-size:17px;}
+.lot{margin-top:11px;padding-top:9px;border-top:1px solid var(--line);}
+.lot .lrow{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:2px 0;} .lot .lrow .lv{font-weight:700;flex:0 0 auto;}
+.wsec{margin-top:11px;padding-top:9px;border-top:1px solid var(--line);}
+.wrow{display:flex;align-items:center;gap:8px;padding:5px 0;flex-wrap:wrap;} .wrow .wname{flex:1;min-width:130px;font-size:13.5px;} .wrow .wpay{font-size:12px;color:var(--muted);}
+.tag{font-size:11px;font-weight:700;border-radius:7px;padding:3px 9px;border:1px solid;}
+.tag.paid{background:#dcfce7;border-color:#86efac;color:#15803d;} .tag.pend{background:#fef3c7;border-color:#fcd34d;color:#b45309;}
+</style></head><body><div class="wrap" id="root"></div>
+<script>
+"use strict";
+var DATA = {"publishedHuman":"05/07/2026, 10:25:33","entries":[{"id":"cb1","dno":"395","party":"Ramesh Textiles","date":"2026-01-15","year":2026,"season":"Winter","sizes":["24x38","16x28","22x36"],"fabrics":[{"name":"Main Fabric (layer 1)","avg":"1 yard 21 inch"},{"name":"Main Fabric (layer 2)","avg":"1.55"},{"name":"Lining","avg":"0.9"},{"name":"Fusing","avg":"0.4"}],"colours":[{"id":"c1","name":"Navy","sets":12,"hasPhoto":true},{"id":"c2","name":"Charcoal","sets":8,"hasPhoto":true}],"workers":[{"id":"w1","role":"Jobworker","name":"Salim","amount":2400,"payments":[{"id":"p1","amount":1000,"date":"2026-06-10","note":"advance"},{"id":"heqguyf","amount":2400,"date":"2026-07-04","note":""}]},{"id":"w2","role":"Embroidery","name":"Anwar","amount":1500,"payments":[]}]}]};
+var ENTRIES = DATA.entries || [];
+var SEASONS=["Summer","Winter","Monsoon","Festive"];
+var ST={search:"",filter:""};
+function esc(s){ s=(s==null?"":""+s); return s.replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function fmtDate(iso){ if(!iso) return ""; var p=(""+iso).split("-"); return p.length===3?(p[2]+"/"+p[1]+"/"+p[0]):iso; }
+function seasonKey(e){ return (e.year&&e.season)?(e.year+" "+e.season):"Unsorted"; }
+function seasonSort(a,b){ var ka=a.key||a, kb=b.key||b; if(ka==="Unsorted")return 1; if(kb==="Unsorted")return -1; var ya=parseInt(ka),yb=parseInt(kb); if(ya!==yb)return yb-ya; return SEASONS.indexOf(ka.split(" ")[1])-SEASONS.indexOf(kb.split(" ")[1]); }
+function inr(n){ return Number(n||0).toLocaleString("en-IN"); }
+function parseAvg(v){ if(typeof v==="number") return isFinite(v)?v:NaN; if(v==null) return NaN; var s=(""+v).trim().toLowerCase(); if(s==="") return NaN; if(/^\d+(\.\d+)?$/.test(s)) return parseFloat(s); var y=0,i=0,m2=false; var mm=s.match(/(\d+(?:\.\d+)?)\s*(?:yards?|yds?|y)\b/); if(mm){y=parseFloat(mm[1]);m2=true;} mm=s.match(/(\d+(?:\.\d+)?)\s*(?:inch(?:es)?|in\b|")/); if(mm){i=parseFloat(mm[1]);m2=true;} if(!m2){ var l=s.match(/^(\d+(?:\.\d+)?)/); return l?parseFloat(l[1]):NaN; } return y+i/36; }
+function combos(){ var map={}; ENTRIES.forEach(function(e){var k=seasonKey(e);map[k]=(map[k]||0)+1;}); return Object.keys(map).map(function(k){return {key:k,count:map[k]};}).sort(seasonSort); }
+function card(e){
+  var total=(e.colours||[]).reduce(function(s,c){return s+(Number(c.sets)||0);},0);
+  var h='<div class="card"><div class="cbhead"><div class="dno">D.No <b>'+esc(e.dno||"—")+"</b>";
+  if(e.party) h+=' &nbsp;·&nbsp; <span class="party">'+esc(e.party)+"</span>";
+  if(e.date) h+=' &nbsp;·&nbsp; <span class="cdate">'+esc(fmtDate(e.date))+"</span>";
+  if(e.year&&e.season) h+=' &nbsp; <span class="seasonbadge">'+esc(e.year)+" "+esc(e.season)+"</span>";
+  h+='</div><div class="sizes">'+((e.sizes&&e.sizes.length)?e.sizes.map(function(s){return esc(s);}).join(" &nbsp;·&nbsp; "):'<span class="faint">no sizes</span>')+"</div></div>";
+  h+='<div class="cbcols"><div class="cbcol"><div class="eyebrow">Fabric &amp; average</div>';
+  if(!(e.fabrics&&e.fabrics.length)) h+='<div class="xs faint">None</div>';
+  (e.fabrics||[]).forEach(function(f){ h+='<div class="frow"><span class="fn">'+esc(f.name)+'</span><span class="avg">'+esc(f.avg)+"</span></div>"; });
+  h+='</div><div class="cbcol sets"><div class="eyebrow">Colours · sets</div>';
+  if(!(e.colours&&e.colours.length)) h+='<div class="xs faint">None</div>';
+  (e.colours||[]).forEach(function(c){
+    var img=c.hasPhoto?'<img loading="lazy" src="photos/cb_'+c.id+'.jpg" onerror="this.remove()">':"";
+    h+='<div class="crow"><div class="thumb">'+img+'</div><span class="cn">'+esc(c.name)+'</span><span class="st">'+esc(c.sets)+"</span></div>";
+  });
+  h+='<div class="ctotal"><span class="b">Total sets — all colours</span><b>'+total+"</b></div></div></div>";
+  if((e.fabrics&&e.fabrics.length)&&total){
+    h+='<div class="lot"><div class="eyebrow">Lot consumption (average × total sets)</div>';
+    e.fabrics.forEach(function(f){ var p=parseAvg(f.avg);
+      if(isFinite(p)) h+='<div class="lrow"><span class="fn">'+esc(f.name)+'</span><span class="lv">'+(p*total).toFixed(1)+" yd</span></div>";
+      else h+='<div class="lrow"><span class="fn">'+esc(f.name)+'</span><span class="lv faint" style="font-weight:500">'+esc(f.avg)+" — not totalled</span></div>";
+    });
+    h+="</div>";
+  }
+  if(e.workers&&e.workers.length){
+    h+='<div class="wsec"><div class="eyebrow">Jobwork &amp; payments</div>';
+    e.workers.forEach(function(w){
+      var paid=(w.payments||[]).reduce(function(s,p){return s+(Number(p.amount)||0);},0);
+      var amt=Number(w.amount)||0; var cls=(amt&&paid>=amt)?"paid":((amt&&paid<amt)?"pend":"");
+      var txt=amt?((paid>=amt)?("Paid ₹"+inr(paid)):("₹"+inr(paid)+" / ₹"+inr(amt))):(paid?("Paid ₹"+inr(paid)):"");
+      h+='<div class="wrow"><div class="wname"><b>'+esc(w.role||"Worker")+"</b> "+esc(w.name||"—")+(amt?' <span class="wpay">· ₹'+inr(amt)+" agreed</span>":"")+"</div>";
+      if(txt) h+='<span class="tag '+cls+'">'+txt+"</span>";
+      h+="</div>";
+    });
+    h+="</div>";
+  }
+  h+="</div>"; return h;
+}
+function render(){
+  var h='<header><div class="hbar"><div class="logo">CB</div><div><h1>Cutting Book</h1><p>Read-only view</p></div><div class="ro">Published<br>'+esc(DATA.publishedHuman||"")+"</div></div></header><main>";
+  h+='<div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="q" placeholder="Search D.No, party, date, fabric…" value="'+esc(ST.search)+'"></div>';
+  var cs=combos();
+  if(cs.length){ h+='<div style="margin-bottom:14px"><select class="in" id="sf"><option value="">All books ('+ENTRIES.length+")</option>";
+    cs.forEach(function(c){ h+='<option value="'+esc(c.key)+'"'+(ST.filter===c.key?" selected":"")+">"+esc(c.key)+" ("+c.count+")</option>"; }); h+="</select></div>"; }
+  var q=ST.search.toLowerCase();
+  var list=ENTRIES.filter(function(e){
+    var hay=[e.dno,e.party,e.date,fmtDate(e.date),e.year,e.season,(e.fabrics||[]).map(function(f){return f.name;}).join(" "),(e.colours||[]).map(function(c){return c.name;}).join(" "),(e.workers||[]).map(function(w){return w.role+" "+w.name;}).join(" ")].join(" ").toLowerCase();
+    return hay.indexOf(q)>=0;
+  });
+  if(ST.filter) list=list.filter(function(e){return seasonKey(e)===ST.filter;});
+  if(!ENTRIES.length) h+='<p class="muted sm">No entries.</p>';
+  else if(!list.length) h+='<p class="muted sm">No entry matches.</p>';
+  else if(ST.filter){ h+='<div class="sp">'; list.forEach(function(e){h+=card(e);}); h+="</div>"; }
+  else {
+    var groups={}; list.forEach(function(e){var k=seasonKey(e);(groups[k]=groups[k]||[]).push(e);});
+    Object.keys(groups).sort(seasonSort).forEach(function(k){
+      h+='<div class="bookhead"><span class="ti">'+esc(k)+'</span><span class="su">'+groups[k].length+(groups[k].length===1?" entry":" entries")+"</span></div>";
+      h+='<div class="sp">'; groups[k].forEach(function(e){h+=card(e);}); h+="</div>";
+    });
+  }
+  h+="</main>";
+  document.getElementById("root").innerHTML=h;
+}
+document.addEventListener("input",function(e){ if(e.target.id==="q"){ ST.search=e.target.value; render(); } });
+document.addEventListener("change",function(e){ if(e.target.id==="sf"){ ST.filter=e.target.value; render(); } });
+render();
+</script></body></html>
