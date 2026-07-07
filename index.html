@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Cutting Book</title>
+<style>
+  :root{
+    --bg:#eef1f5; --panel:#fff; --ink:#1e293b; --muted:#64748b; --faint:#94a3b8;
+    --line:#e2e8f0; --line2:#cbd5e1; --accent:#0d9488; --accent-d:#0f766e;
+    --red-bg:#fee2e2; --red-ln:#fca5a5; --red-tx:#b91c1c;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif; font-size:15px; line-height:1.4; -webkit-text-size-adjust:100%;}
+  .wrap{max-width:920px; margin:0 auto; min-height:100vh;}
+  header{background:#0f172a; color:#fff; position:sticky; top:0; z-index:20;
+    background-image:linear-gradient(#1e293b 1px,transparent 1px),linear-gradient(90deg,#1e293b 1px,transparent 1px); background-size:22px 22px; background-position:center;}
+  .hbar{max-width:920px; margin:0 auto; display:flex; align-items:center; gap:12px; padding:13px 16px;}
+  .logo{height:34px; width:34px; border-radius:8px; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px;}
+  .htext h1{font-size:17px; margin:0; font-weight:650; letter-spacing:.2px;}
+  .htext p{margin:0; font-size:11px; color:#94a3b8;}
+  .hbtns{margin-left:auto; display:flex; gap:6px;}
+  .hbtns button{background:#1e293b; color:#cbd5e1; border:1px solid #334155; border-radius:7px; padding:6px 10px; font-size:12px; cursor:pointer;}
+  .hbtns button:active{background:#334155;}
+  main{padding:16px;}
+  .row{display:flex; align-items:center; gap:8px;}
+  .between{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .sp{display:flex; flex-direction:column; gap:12px;}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:11px; box-shadow:0 1px 2px rgba(15,23,42,.04); padding:14px;}
+  .muted{color:var(--muted);} .faint{color:var(--faint);}
+  .xs{font-size:12px;} .sm{font-size:13px;} .b{font-weight:650;}
+  .truncate{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .hint{font-size:11px; color:var(--faint); margin-top:4px;}
+  .btn{display:inline-flex; align-items:center; gap:6px; border-radius:8px; padding:8px 12px; font-size:13.5px; font-weight:600; cursor:pointer; border:1px solid var(--line2); background:#fff; color:var(--ink);}
+  .btn:active{transform:translateY(1px);}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .btn.primary:active{background:var(--accent-d);}
+  .btn.ghost{border:none; background:none; color:var(--accent); padding:4px 6px;}
+  .icobtn{border:none; background:none; cursor:pointer; color:var(--faint); padding:4px; line-height:0;}
+  .icobtn:active{color:var(--accent);}
+  .icobtn.del:active{color:var(--red-tx);}
+  label.f{display:block; font-size:13px;}
+  label.f > span{font-size:11px; color:var(--muted); font-weight:600;}
+  .in{width:100%; margin-top:3px; border:1px solid var(--line2); border-radius:8px; padding:8px 10px; background:#fff; font-family:inherit; font-size:14px; color:var(--ink);}
+  .in:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(13,148,136,.15);}
+  textarea.in{resize:vertical; min-height:46px; line-height:1.5;}
+  .search{position:relative; flex:1;}
+  .search input{width:100%; padding:10px 12px 10px 34px; border:1px solid var(--line2); border-radius:9px; background:#fff;}
+  .search svg{position:absolute; left:10px; top:11px; color:var(--faint);}
+  .eyebrow{font-size:11px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:var(--faint); margin:0 0 4px;}
+  .thumb{height:62px; width:62px; border-radius:9px; border:1px solid var(--line); background:#f1f5f9 center/cover no-repeat; display:flex; align-items:center; justify-content:center; color:#cbd5e1; flex:0 0 auto;}
+  .thumb.lg{height:84px; width:84px;}
+  .thumb.has{color:transparent;}
+  /* cutting book layout */
+  .cbhead{display:flex; align-items:baseline; gap:12px; border-bottom:1px solid var(--line); padding-bottom:9px; margin-bottom:11px; flex-wrap:wrap;}
+  .cbhead .dno{font-size:16px; font-weight:700;}
+  .cbhead .dno b{color:var(--accent);}
+  .cbhead .party{font-weight:700; color:var(--ink); font-size:16px;}
+  .cbhead .cdate{font-size:16px; font-weight:700; color:var(--muted);}
+  .seasonbadge{display:inline-block; font-size:16px; font-weight:700; color:var(--accent); background:#e6fffb; border:1px solid #99f6e4; border-radius:999px; padding:2px 10px;}
+  .seasonbadge.s-winter{color:#1e40af; background:#dbeafe; border-color:#93c5fd;}
+  .seasonbadge.s-summer{color:#c2410c; background:#ffedd5; border-color:#fdba74;}
+  .seasonbadge.s-festive{color:#b91c1c; background:#fee2e2; border-color:#fca5a5;}
+  .seasonbadge.s-monsoon{color:#15803d; background:#dcfce7; border-color:#86efac;}
+  .bookhead{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin:18px 0 10px; padding-bottom:6px; border-bottom:2px solid var(--ink);}
+  .bookhead:first-of-type{margin-top:2px;}
+  .bookhead .ti{font-size:15px; font-weight:800;}
+  .bookhead .su{font-size:12px; color:var(--muted);}
+  .cbhead .sizes{flex:1; min-width:120px; color:var(--ink); font-size:18px; font-weight:700;}
+  .cbhead .acts{display:flex; gap:2px; margin-left:auto;}
+  .cbcols{display:grid; grid-template-columns:1fr 1.15fr; gap:0;}
+  .cbcol{padding:0 12px;} .cbcol:first-child{padding-left:0;}
+  .cbcol.sets{border-left:1px solid var(--line);}
+  .frow{display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:13px; padding:3px 0; border-bottom:1px dashed var(--line);}
+  .frow .fn{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .frow .avg{font-weight:800; flex:0 0 auto; font-size:19px;}
+  .crow{display:flex; align-items:center; gap:22px; padding:5px 0;}
+  .crow .thumb{height:52px; width:52px; border-radius:8px;} .crow .thumb svg{width:24px;height:24px;}
+  .crow .thumb.has{cursor:zoom-in;}
+  /* full-screen photo zoom */
+  .photozoom{position:fixed; inset:0; z-index:200; background:rgba(2,6,23,.9); display:flex; align-items:center; justify-content:center; padding:16px; cursor:zoom-out;}
+  .photozoom img{max-width:100%; max-height:100%; border-radius:8px; box-shadow:0 12px 44px rgba(0,0,0,.55);}
+  .pzclose{position:fixed; top:14px; right:14px; background:rgba(255,255,255,.16); border:none; color:#fff; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .pzclose svg{width:22px; height:22px;}
+  .crow .cn{margin-left:auto; text-align:right; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px;}
+  .crow .st{font-weight:800; font-size:15px;}
+  .ctotal{display:flex; justify-content:space-between; align-items:center; margin-top:7px; padding-top:7px; border-top:2px solid var(--ink); font-size:13px;}
+  .ctotal b{font-size:17px;}
+  .lot{margin-top:11px; padding-top:9px; border-top:1px solid var(--line);}
+  .lot .lrow{display:flex; justify-content:space-between; gap:8px; font-size:12.5px; padding:2px 0;}
+  .lot .lrow .lv{font-weight:700; flex:0 0 auto;}
+  .lottotal{display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px solid var(--line); font-size:13px; font-weight:800;}
+  .cbslot{display:grid; gap:7px; align-items:center; margin-bottom:6px;}
+  .cbslot.fab{grid-template-columns:1fr 130px;}
+  .cbslot.col{grid-template-columns:34px 1fr 84px;}
+  .cbslot.wrk{grid-template-columns:110px 1fr 96px;}
+  /* jobwork & payments */
+  .wsec{margin-top:11px; padding-top:9px; border-top:1px solid var(--line);}
+  .wrow{display:flex; align-items:center; gap:8px; padding:5px 0; flex-wrap:wrap;}
+  .wrow .wname{flex:1; min-width:130px; font-size:13.5px;}
+  .wrow .wpay{font-size:12px; color:var(--muted);}
+  .paybtn{border:1px solid var(--line2); background:#fff; border-radius:7px; padding:5px 11px; font-size:12px; font-weight:700; cursor:pointer; flex:0 0 auto;}
+  .paybtn.pending{background:#fef3c7; border-color:#fcd34d; color:#b45309;}
+  .paybtn.paid{background:#dcfce7; border-color:#86efac; color:#15803d;}
+  .prow{display:flex; align-items:center; gap:8px; font-size:13px; padding:6px 0; border-bottom:1px dashed var(--line);}
+  /* modal */
+  .scrim{position:fixed; inset:0; background:rgba(2,6,23,.45); display:flex; align-items:flex-end; justify-content:center; z-index:50;}
+  @media(min-width:560px){ .scrim{align-items:center; padding:16px;} }
+  .modal{background:#fff; width:100%; max-width:640px; max-height:92vh; overflow:auto; border-radius:16px 16px 0 0;}
+  @media(min-width:560px){ .modal{border-radius:16px;} }
+  .mhead{position:sticky; top:0; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--line); z-index:1;}
+  .mhead h3{margin:0; font-size:16px;}
+  .mbody{padding:16px;}
+  .mfoot{display:flex; justify-content:flex-end; gap:8px; margin-top:16px;}
+  svg{display:inline-block; vertical-align:middle;}
+  /* auth gate */
+  #authgate{position:fixed; inset:0; z-index:100; background:#0f172a;
+    background-image:linear-gradient(#1e293b 1px,transparent 1px),linear-gradient(90deg,#1e293b 1px,transparent 1px); background-size:22px 22px;
+    display:flex; align-items:center; justify-content:center; padding:20px;}
+  #authgate.hide{display:none;}
+  .loginbox{background:#fff; width:100%; max-width:360px; border-radius:16px; padding:22px; box-shadow:0 20px 50px rgba(0,0,0,.4);}
+  .loginbox .lg{height:40px;width:40px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:15px;margin-bottom:14px;}
+  .loginbox h2{margin:0 0 2px;font-size:19px;}
+  .loginbox p.sub{margin:0 0 18px;font-size:13px;color:var(--muted);}
+  .loginbox label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:10px 0 3px;}
+  .loginbox input{width:100%;border:1px solid var(--line2);border-radius:9px;padding:11px 12px;font-size:15px;font-family:inherit;}
+  .loginbox input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(13,148,136,.15);}
+  .loginbox button{width:100%;margin-top:18px;background:var(--accent);color:#fff;border:none;border-radius:9px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;}
+  .loginbox button:active{background:var(--accent-d);}
+  .loginbox button:disabled{opacity:.6;}
+  .lerr{color:var(--red-tx);font-size:12.5px;margin-top:12px;min-height:16px;}
+  .rolebadge{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.3px;text-transform:uppercase;}
+  .rolebadge.edit{background:#dcfce7;color:#15803d;}
+  .rolebadge.view{background:#e2e8f0;color:#475569;}
+</style>
+</head>
+<body>
+<div id="authgate">
+  <div class="loginbox">
+    <div class="lg">CB</div>
+    <h2>Cutting Book</h2>
+    <p class="sub">Sign in to view the factory book.</p>
+    <label for="lg-email">Login ID</label>
+    <input id="lg-email" type="email" autocomplete="username" placeholder="editor@mcuttingbook.com">
+    <label for="lg-pass">Password</label>
+    <input id="lg-pass" type="password" autocomplete="current-password" placeholder="••••••">
+    <button id="lg-btn">Sign in</button>
+    <div class="lerr" id="lg-err"></div>
+  </div>
+</div>
+<div class="wrap" id="root"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut }
+  from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, getDocs }
+  from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+/* ===== YOUR FIREBASE PROJECT ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAEcB0xlQA9gaKpcGaa2_4uRKUk0DHIQBY",
+  authDomain: "mcuttingbook.firebaseapp.com",
+  projectId: "mcuttingbook",
+  storageBucket: "mcuttingbook.firebasestorage.app",
+  messagingSenderId: "1066367518523",
+  appId: "1:1066367518523:web:ed5dcc588bccd9c9e6991e"
+};
+/* Only this login can edit. Everyone else is view-only (also enforced by the
+   Firestore security rules — the client hiding is just convenience). */
+const EDITOR_EMAIL = "editor@mcuttingbook.com";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const fdb = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
+const bookRef = doc(fdb, "book", "main");
+let isEditor = false;
+let unsubBook = null;
+
+/* ---- auth gate wiring ---- */
+const gate = document.getElementById("authgate");
+const lgBtn = document.getElementById("lg-btn");
+const lgErr = document.getElementById("lg-err");
+async function doLogin(){
+  const email = document.getElementById("lg-email").value.trim();
+  const pass = document.getElementById("lg-pass").value;
+  lgErr.textContent = "";
+  if(!email || !pass){ lgErr.textContent = "Enter login ID and password."; return; }
+  lgBtn.disabled = true; lgBtn.textContent = "Signing in…";
+  try{ await signInWithEmailAndPassword(auth, email, pass); }
+  catch(err){
+    lgErr.textContent = (err.code==="auth/invalid-credential"||err.code==="auth/wrong-password"||err.code==="auth/user-not-found")
+      ? "Wrong login ID or password." : ("Could not sign in: "+(err.code||err.message));
+  }
+  finally{ lgBtn.disabled = false; lgBtn.textContent = "Sign in"; }
+}
+lgBtn.addEventListener("click", doLogin);
+document.getElementById("lg-pass").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+
+onAuthStateChanged(auth, user=>{
+  if(user){
+    isEditor = (user.email||"").toLowerCase() === EDITOR_EMAIL.toLowerCase();
+    gate.classList.add("hide");
+    startBook();
+  } else {
+    isEditor = false;
+    if(unsubBook){ unsubBook(); unsubBook=null; }
+    gate.classList.remove("hide");
+  }
+});
+function startBook(){
+  if(unsubBook) return; // already listening
+  unsubBook = onSnapshot(bookRef, snap=>{
+    const data = snap.exists() ? snap.data() : null;
+    S.entries = (data && Array.isArray(data.entries)) ? data.entries : [];
+    render();
+  }, err=>{ console.warn("book listen error", err); });
+}
+async function logout(){ if(unsubBook){ unsubBook(); unsubBook=null; } await signOut(auth); }
+
+const I={
+  plus:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M12 5v14"/></svg>',
+  pencil:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  trash:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  cam:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>',
+  check:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>',
+  search:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+};
+
+/* storage — now backed by Firestore instead of this device.
+   Photos live one-per-document in the "photos" collection, keyed by the same
+   stable "cb:<colourId>" ids the app already used. A small memory cache keeps
+   re-renders from re-reading the same photo. */
+const photoCache = {};
+async function putPhoto(id,d){
+  if(!isEditor) return;
+  try{ await setDoc(doc(fdb,"photos",id), {d}); photoCache[id]=d; }catch(e){ console.warn("putPhoto",e); }
+}
+async function getPhoto(id){
+  if(id in photoCache) return photoCache[id];
+  try{ const s=await getDoc(doc(fdb,"photos",id)); const d=s.exists()?(s.data().d||null):null; photoCache[id]=d; return d; }
+  catch(e){ return null; }
+}
+async function delPhoto(id){
+  delete photoCache[id];
+  if(!isEditor) return;
+  try{ await deleteDoc(doc(fdb,"photos",id)); }catch(e){ console.warn("delPhoto",e); }
+}
+async function allPhotos(){
+  const out={};
+  try{ const qs=await getDocs(collection(fdb,"photos")); qs.forEach(dc=>{ out[dc.id]=dc.data().d; }); }catch(e){}
+  return out;
+}
+
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const inr=n=>Number(n||0).toLocaleString("en-IN");
+
+function parseAvg(v){
+  if(typeof v==="number") return isFinite(v)?v:NaN;
+  if(v==null) return NaN;
+  const s=String(v).trim().toLowerCase(); if(s==="") return NaN;
+  if(/^\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  let yards=0,inches=0,matched=false;
+  let m=s.match(/(\d+(?:\.\d+)?)\s*(?:yards?|yds?|y)\b/); if(m){yards=parseFloat(m[1]);matched=true;}
+  m=s.match(/(\d+(?:\.\d+)?)\s*(?:inch(?:es)?|in\b|")/); if(m){inches=parseFloat(m[1]);matched=true;}
+  if(!matched){ const lead=s.match(/^(\d+(?:\.\d+)?)/); return lead?parseFloat(lead[1]):NaN; }
+  return yards+inches/36;
+}
+
+const SEASONS=["Summer","Winter","Monsoon","Festive"];
+const seasonKey = e => (e.year && e.season) ? (e.year+" "+e.season) : "Unsorted";
+function seasonCombos(entries){
+  const map={};
+  for(const e of entries){ const k=seasonKey(e); map[k]=(map[k]||0)+1; }
+  return Object.keys(map).map(k=>({key:k,count:map[k]})).sort(seasonSort);
+}
+function seasonSort(a,b){
+  const ka=(a.key||a), kb=(b.key||b);
+  if(ka==="Unsorted") return 1; if(kb==="Unsorted") return -1;
+  const ya=parseInt(ka), yb=parseInt(kb);
+  if(ya!==yb) return yb-ya;
+  const sa=SEASONS.indexOf(ka.split(" ")[1]), sb=SEASONS.indexOf(kb.split(" ")[1]);
+  return sa-sb;
+}
+function defaults(){
+  return { entries:[{
+    id:"cb1", dno:"395", party:"Ramesh Textiles", date:"2026-01-15", year:2026, season:"Winter", sizes:["24x38","16x28","22x36"],
+    fabrics:[
+      {name:"Main Fabric (layer 1)",avg:"1 yard 21 inch"},
+      {name:"Main Fabric (layer 2)",avg:"1.55"},
+      {name:"Lining",avg:"0.9"},
+      {name:"Fusing",avg:"0.4"},
+    ],
+    colours:[
+      {id:"c1",name:"Navy",sets:12,hasPhoto:false},
+      {id:"c2",name:"Charcoal",sets:8,hasPhoto:false},
+    ],
+    workers:[
+      {id:"w1",role:"Jobworker",name:"Salim",amount:2400,payments:[{id:"p1",amount:1000,date:"2026-06-10",note:"advance"}]},
+      {id:"w2",role:"Embroidery",name:"Anwar",amount:1500,payments:[]},
+    ],
+  }] };
+}
+
+let S = { entries:[], search:"", modal:null, filter:"" };
+/* entries are pushed to Firestore (one shared document). Only the editor writes;
+   every other device receives the change live through the onSnapshot listener. */
+async function persist(){
+  if(!isEditor) return;
+  try{ await setDoc(bookRef, { entries: S.entries }); }
+  catch(err){ console.warn("save failed", err); alert("Save didn't reach the server — check the internet and try again."); }
+}
+function commit(){ persist(); render(); }
+
+/* ---------------- render ---------------- */
+function render(){
+  const f=saveFocus();
+  const badge = isEditor ? '<span class="rolebadge edit">Editing</span>' : '<span class="rolebadge view">View only</span>';
+  let h='<header><div class="hbar"><div class="logo">CB</div>'
+    + '<div class="htext"><h1>Cutting Book</h1><p>Pattern · fabric · sets · jobwork</p></div>'
+    + '<div class="hbtns">'+badge+'<button data-a="export">Backup</button>'
+    + (isEditor?'<button data-a="import">Restore</button>':'')
+    + '<button data-a="logout">Sign out</button></div></div></header><main>';
+  h+=`<div class="row" style="margin-bottom:10px">`
+    + `<div class="search">${I.search}<input id="search" data-a="search" value="${esc(S.search)}" placeholder="Search D.No, party, fabric…"></div>`
+    + (isEditor?`<button class="btn primary" data-a="add">${I.plus} New entry</button>`:``)+`</div>`;
+  // season / year filter
+  const combos=seasonCombos(S.entries);
+  if(combos.length){
+    h+=`<div style="margin-bottom:14px"><select class="in" id="seasonFilter" data-a="seasonFilter">
+      <option value="">All books (${S.entries.length})</option>`
+      + combos.map(c=>`<option value="${esc(c.key)}" ${S.filter===c.key?"selected":""}>${esc(c.key)} (${c.count})</option>`).join("")
+      + `</select></div>`;
+  }
+  const q=S.search.toLowerCase();
+  let list=S.entries.filter(e=>{
+    const hay=[e.dno,e.party,e.date,fmtDate(e.date),e.year,e.season,(e.fabrics||[]).map(f=>f.name).join(" "),(e.colours||[]).map(c=>c.name).join(" "),(e.workers||[]).map(w=>w.role+" "+w.name).join(" ")].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+  if(S.filter) list=list.filter(e=>seasonKey(e)===S.filter);
+
+  if(!S.entries.length) h+='<p class="muted sm">No entries yet. Tap “New entry” to record a cut like a page of your book.</p>';
+  else if(!list.length) h+='<p class="muted sm">No entry matches.</p>';
+  else if(S.filter){
+    h+='<div class="sp">'; for(const e of list) h+=entryCard(e); h+='</div>';
+  } else {
+    // group under season-year headers
+    const groups={};
+    for(const e of list){ const k=seasonKey(e); (groups[k]=groups[k]||[]).push(e); }
+    const keys=Object.keys(groups).sort(seasonSort);
+    for(const k of keys){
+      h+=`<div class="bookhead"><span class="ti">${esc(k)}</span><span class="su">${groups[k].length} ${groups[k].length===1?"entry":"entries"}</span></div>`;
+      h+='<div class="sp">'; for(const e of groups[k]) h+=entryCard(e); h+='</div>';
+    }
+  }
+  h+='</main>';
+  if(S.modal) h+=renderModal();
+  document.getElementById("root").innerHTML=h;
+  restoreFocus(f);
+  fillPhotos();
+  if(S.modal && S.modal.type==="entry") populateCBPreviews();
+}
+function saveFocus(){ const el=document.activeElement; if(el&&el.id&&(el.tagName==="INPUT"||el.tagName==="TEXTAREA")) return {id:el.id,s:el.selectionStart,e:el.selectionEnd}; return null; }
+function restoreFocus(f){ if(!f) return; const el=document.getElementById(f.id); if(el){ el.focus(); try{el.setSelectionRange(f.s,f.e);}catch(e){} } }
+async function fillPhotos(){ for(const el of document.querySelectorAll("[data-photo]")){ const id=el.getAttribute("data-photo"); if(!id) continue; const d=await getPhoto(id); if(d){ el.style.backgroundImage=`url(${d})`; el.classList.add("has"); el.innerHTML=""; } } }
+
+function fmtDate(iso){ if(!iso) return ""; const p=String(iso).split("-"); return p.length===3? (p[2]+"/"+p[1]+"/"+p[0]) : iso; }
+function entryCard(e){
+  const total=(e.colours||[]).reduce((s,c)=>s+(Number(c.sets)||0),0);
+  let h=`<div class="card">
+    <div class="cbhead">
+      <div class="dno">D.No <b>${esc(e.dno||"—")}</b>${e.party?` &nbsp;·&nbsp; <span class="party">${esc(e.party)}</span>`:""}${e.date?` &nbsp;·&nbsp; <span class="cdate">${esc(fmtDate(e.date))}</span>`:""}${(e.year&&e.season)?` &nbsp; <span class="seasonbadge s-${esc(String(e.season).toLowerCase())}">${esc(e.year)} ${esc(e.season)}</span>`:""}</div>
+      <div class="sizes">${(e.sizes&&e.sizes.length)? e.sizes.map(s=>esc(s)).join(" &nbsp;·&nbsp; ") : '<span class="faint">no sizes</span>'}</div>
+      <div class="acts">${isEditor?`<button class="icobtn" data-a="edit" data-id="${e.id}">${I.pencil}</button><button class="icobtn del" data-a="del" data-id="${e.id}">${I.trash}</button>`:``}</div>
+    </div>
+    <div class="cbcols">
+      <div class="cbcol"><div class="eyebrow">Fabric &amp; average</div>`;
+  if(!(e.fabrics&&e.fabrics.length)) h+='<div class="xs faint">None</div>';
+  for(const f of (e.fabrics||[])) h+=`<div class="frow"><span class="fn">${esc(f.name)}</span><span class="avg">${esc(f.avg)}</span></div>`;
+  h+=`</div><div class="cbcol sets"><div class="eyebrow">Colours · sets</div>`;
+  if(!(e.colours&&e.colours.length)) h+='<div class="xs faint">None</div>';
+  for(const c of (e.colours||[])) h+=`<div class="crow"><div class="thumb" data-photo="${c.hasPhoto?('cb:'+c.id):''}"${c.hasPhoto?' data-a="cb-zoom"':''}>${I.cam}</div><span class="cn">${esc(c.name)}</span><span class="st">${esc(c.sets)}</span></div>`;
+  h+=`<div class="ctotal"><span class="b">Total sets — all colours</span><b>${total}</b></div></div></div>`;
+  if(e.workers&&e.workers.length){
+    h+='<div class="wsec"><div class="eyebrow">Jobwork &amp; payments</div>';
+    for(const w of e.workers){
+      const paid=(w.payments||[]).reduce((s,p)=>s+(Number(p.amount)||0),0);
+      const amt=Number(w.amount)||0;
+      const cls = (amt&&paid>=amt)?"paid":((amt&&paid<amt)?"pending":"");
+      let payTxt="";
+      if(amt) payTxt = (paid>=amt)?("Paid ₹"+inr(paid)):("₹"+inr(paid)+" / ₹"+inr(amt)+" · bal ₹"+inr(amt-paid));
+      else if(paid) payTxt = "Paid ₹"+inr(paid);
+      h+=`<div class="wrow">
+        <div class="wname"><b>${esc(w.role||"Worker")}</b> ${esc(w.name||"—")}${amt?` <span class="wpay">· ₹${inr(amt)} agreed</span>`:""}</div>
+        ${payTxt?`<div class="wpay">${payTxt}</div>`:""}
+        ${isEditor
+          ? `<button class="paybtn ${cls}" data-a="pay-open" data-entry="${e.id}" data-worker="${w.id}">${cls==="paid"?"Paid ✓":"Payment"}</button>`
+          : `<span class="paybtn ${cls}" style="cursor:default">${cls==="paid"?"Paid ✓":(cls==="pending"?"Pending":"—")}</span>`}
+      </div>`;
+    }
+    h+='</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+/* ---------------- modal ---------------- */
+function modalShell(title, body){
+  return `<div class="scrim" data-a="scrim"><div class="modal"><div class="mhead"><h3>${esc(title)}</h3><button class="icobtn" data-a="close">${I.x}</button></div><div class="mbody">${body}</div></div></div>`;
+}
+function renderModal(){
+  if(S.modal.type==="pay") return renderPayModal();
+  return renderEntryModal();
+}
+function renderEntryModal(){
+  const e=S.modal.data; const title=e.id?"Edit cutting entry":"New cutting entry";
+  let fab="",col="",wrk="";
+  for(let i=0;i<fabRows;i++){ const f=(e.fabrics||[])[i]||{name:"",avg:""};
+    fab+=`<div class="cbslot fab"><input class="in" id="cf-name-${i}" value="${esc(f.name)}" placeholder="Fabric ${i+1} name"><input class="in" id="cf-avg-${i}" value="${esc(f.avg)}" placeholder="avg e.g. 1 yd 3 in"></div>`; }
+  for(let i=0;i<6;i++){ const c=(e.colours||[])[i]||{name:"",sets:""};
+    col+=`<div class="cbslot col"><div class="thumb" id="cbph-${i}" style="height:34px;width:34px;cursor:pointer;position:relative">${I.cam}<input type="file" accept="image/*" data-a="cb-pickphoto" data-row="${i}" style="position:absolute;inset:0;opacity:0;cursor:pointer"></div><input class="in" id="cc-name-${i}" value="${esc(c.name)}" placeholder="Colour ${i+1}"><input class="in" id="cc-sets-${i}" type="number" inputmode="numeric" value="${esc(c.sets)}" placeholder="sets"></div>`; }
+  for(let i=0;i<workerRows;i++){ const w=(e.workers||[])[i]||{role:(i===0?"Jobworker":i===1?"Embroidery":""),name:"",amount:""};
+    wrk+=`<div class="cbslot wrk"><input class="in" id="wf-role-${i}" value="${esc(w.role)}" placeholder="Role"><input class="in" id="wf-name-${i}" value="${esc(w.name)}" placeholder="Worker name"><input class="in" id="wf-amt-${i}" type="number" inputmode="numeric" value="${esc(w.amount)}" placeholder="₹ agreed"></div>`; }
+  const curYear=new Date().getFullYear();
+  const body=`<div class="sp" style="gap:14px">
+    <div class="row" style="gap:10px; align-items:flex-end">
+      <label class="f" style="width:120px"><span>D.No (pattern)</span><input class="in" id="cb-dno" value="${esc(e.dno||"")}" placeholder="395"></label>
+      <label class="f" style="flex:1"><span>Party name</span><input class="in" id="cb-party" value="${esc(e.party||"")}" placeholder="e.g. Ramesh Textiles"></label>
+      <label class="f"><span>Cutting date</span><input class="in" id="cb-date" type="date" value="${esc(e.date||"")}" style="width:150px"></label>
+    </div>
+    <div class="row" style="gap:10px; align-items:flex-end">
+      <label class="f" style="flex:1"><span>Season</span><select class="in" id="cb-season">${SEASONS.map(s=>`<option ${s===(e.season||"Winter")?"selected":""}>${s}</option>`).join("")}</select></label>
+      <label class="f" style="flex:1"><span>Year</span><input class="in" id="cb-year" type="number" inputmode="numeric" value="${esc(e.year||curYear)}" placeholder="${curYear}"></label>
+    </div>
+    <label class="f"><span>Sizes — one per line</span><textarea class="in" id="cb-sizes" placeholder="24x38&#10;16x28">${esc((e.sizes||[]).join("\n"))}</textarea></label>
+    <div><div class="xs b muted" style="margin-bottom:5px">Fabric · average</div><div id="fab-rows">${fab}</div>
+      <button class="btn ghost xs" data-a="add-fab" style="padding:4px 0">${I.plus} Add fabric line</button>
+      <p class="hint">Average can be words or numbers (“1 yard 3 inch” or “1.6”). Blank rows are ignored.</p></div>
+    <div><div class="xs b muted" style="margin-bottom:5px">Colours — photo, name &amp; sets</div>${col}<p class="hint">Tap a photo box to add that colour's fabric picture. Total sets calculate on their own.</p></div>
+    <div><div class="xs b muted" style="margin-bottom:5px">Jobwork — role, worker name &amp; agreed amount</div><div id="wrk-rows">${wrk}</div>
+      <button class="btn ghost xs" data-a="add-worker" style="padding:4px 0">${I.plus} Add worker</button>
+      <p class="hint">Record payments later from the “Payment” button on the saved page. Rows with no name are ignored.</p></div>
+  </div>
+  <div class="mfoot"><button class="btn" data-a="close">Cancel</button><button class="btn primary" data-a="save">Save entry</button></div>`;
+  return modalShell(title, body);
+}
+function renderPayModal(){
+  const e=S.entries.find(x=>x.id===S.modal.entryId);
+  const w=e&&(e.workers||[]).find(x=>x.id===S.modal.workerId);
+  if(!w){ S.modal=null; return ""; }
+  const paid=(w.payments||[]).reduce((s,p)=>s+(Number(p.amount)||0),0);
+  const amt=Number(w.amount)||0;
+  const today=new Date().toISOString().slice(0,10);
+  let plist="";
+  if(!(w.payments&&w.payments.length)) plist='<div class="xs faint" style="padding:6px 0">No payments recorded yet.</div>';
+  for(const p of (w.payments||[])) plist+=`<div class="prow"><span style="font-weight:800">₹${inr(p.amount)}</span><span class="muted">${esc(p.date||"")}</span><span class="muted truncate" style="flex:1">${esc(p.note||"")}</span><button class="icobtn del" data-a="pay-del" data-pid="${p.id}">${I.trash}</button></div>`;
+  const summary = amt
+    ? `Agreed ₹${inr(amt)} · paid ₹${inr(paid)} · <b style="color:${paid>=amt?'var(--accent)':'var(--red-tx)'}">balance ₹${inr(Math.max(0,amt-paid))}</b>`
+    : `Total paid ₹${inr(paid)}`;
+  const body=`<div class="sp" style="gap:12px">
+    <div><div style="font-weight:700">${esc(w.role||"Worker")} — ${esc(w.name||"—")}</div><div class="sm muted" style="margin-top:2px">${summary}</div></div>
+    <div><div class="eyebrow">Payments</div>${plist}</div>
+    <div><div class="xs b muted" style="margin-bottom:5px">Record a payment</div>
+      <div class="row" style="gap:8px; flex-wrap:wrap; align-items:flex-end">
+        <label class="f"><span>Amount ₹</span><input class="in" id="pay-amt" type="number" inputmode="numeric" style="width:110px" placeholder="0"></label>
+        <label class="f"><span>Date</span><input class="in" id="pay-date" type="date" value="${today}" style="width:150px"></label>
+        <label class="f" style="flex:1; min-width:120px"><span>Note (optional)</span><input class="in" id="pay-note" placeholder="advance / final"></label>
+        <button class="btn primary" data-a="pay-add">${I.plus} Add</button>
+      </div></div>
+  </div>
+  <div class="mfoot"><button class="btn" data-a="close">Close</button></div>`;
+  return modalShell("Payments — D.No "+esc(e.dno||"—")+(e.party?(" · "+esc(e.party)):""), body);
+}
+
+let pendingCB={};
+let fabRows=6;
+let workerRows=2;
+function addFabRow(){
+  const cont=document.getElementById("fab-rows"); if(!cont) return;
+  const i=fabRows;
+  const div=document.createElement("div");
+  div.className="cbslot fab";
+  div.innerHTML=`<input class="in" id="cf-name-${i}" placeholder="Fabric ${i+1} name"><input class="in" id="cf-avg-${i}" placeholder="avg e.g. 1 yd 3 in">`;
+  cont.appendChild(div);
+  fabRows++;
+  const el=document.getElementById("cf-name-"+i); if(el) el.focus();
+}
+function addWorkerRow(){
+  const cont=document.getElementById("wrk-rows"); if(!cont) return;
+  const i=workerRows;
+  const div=document.createElement("div");
+  div.className="cbslot wrk";
+  div.innerHTML=`<input class="in" id="wf-role-${i}" placeholder="Role"><input class="in" id="wf-name-${i}" placeholder="Worker name"><input class="in" id="wf-amt-${i}" type="number" inputmode="numeric" placeholder="₹ agreed">`;
+  cont.appendChild(div);
+  workerRows++;
+  const el=document.getElementById("wf-name-"+i); if(el) el.focus();
+}
+async function populateCBPreviews(){
+  const e=S.modal.data;
+  for(let i=0;i<6;i++){ const el=document.getElementById("cbph-"+i); if(!el) continue;
+    const existing=(e.colours||[])[i]; let d=null;
+    if(pendingCB[i]===null) d=null;
+    else if(typeof pendingCB[i]==="string") d=pendingCB[i];
+    else if(existing&&existing.hasPhoto) d=await getPhoto("cb:"+existing.id);
+    const svg=el.querySelector("svg");
+    if(d){ el.style.backgroundImage=`url(${d})`; el.classList.add("has"); if(svg) svg.style.display="none"; }
+    else { el.style.backgroundImage=""; el.classList.remove("has"); if(svg) svg.style.display=""; }
+  }
+}
+
+/* ---------------- actions ---------------- */
+const val=id=>{ const el=document.getElementById(id); return el?el.value.trim():""; };
+
+document.addEventListener("click", e=>{
+  const t=e.target.closest("[data-a]"); if(!t) return;
+  const a=t.getAttribute("data-a"), id=t.getAttribute("data-id");
+  if(a==="scrim" && e.target!==t) return;
+  // viewers can only look, close, search, filter, back up and sign out
+  const EDIT_ACTIONS=["add","edit","del","add-fab","add-worker","pay-open","pay-add","pay-del","save","import"];
+  if(!isEditor && EDIT_ACTIONS.includes(a)) return;
+  switch(a){
+    case "scrim": case "close": S.modal=null; render(); break;
+    case "logout": logout(); break;
+    case "export": doExport(); break;
+    case "import": doImport(); break;
+    case "add": { pendingCB={}; fabRows=6; workerRows=2;
+      let yr=new Date().getFullYear(), se="Winter";
+      const fm=(S.filter||"").match(/^(\d{4})\s+(\w+)/); if(fm){ yr=+fm[1]; se=fm[2]; }
+      S.modal={type:"entry",data:{dno:"",party:"",year:yr,season:se,sizes:[],fabrics:[],colours:[],workers:[]}}; render(); break; }
+    case "edit": { pendingCB={}; const en=S.entries.find(x=>x.id===id); fabRows=Math.max(6,(en.fabrics||[]).length); workerRows=Math.max(2,(en.workers||[]).length); S.modal={type:"entry",data:{...en,sizes:[...(en.sizes||[])],fabrics:(en.fabrics||[]).map(f=>({...f})),colours:(en.colours||[]).map(c=>({...c})),workers:(en.workers||[]).map(w=>({...w}))}}; render(); break; }
+    case "del": { const en=S.entries.find(x=>x.id===id); if(en&&en.colours) en.colours.forEach(c=>{ if(c.hasPhoto) delPhoto("cb:"+c.id); }); S.entries=S.entries.filter(x=>x.id!==id); commit(); break; }
+    case "add-fab": addFabRow(); break;
+    case "add-worker": addWorkerRow(); break;
+    case "pay-open": S.modal={type:"pay", entryId:t.getAttribute("data-entry"), workerId:t.getAttribute("data-worker")}; render(); break;
+    case "pay-add": {
+      const en=S.entries.find(x=>x.id===S.modal.entryId); const w=en&&(en.workers||[]).find(x=>x.id===S.modal.workerId); if(!w) break;
+      const amt=Number(val("pay-amt"))||0; if(amt<=0){ const el=document.getElementById("pay-amt"); if(el) el.focus(); break; }
+      if(!w.payments) w.payments=[];
+      w.payments.push({id:uid(), amount:amt, date:val("pay-date")||new Date().toISOString().slice(0,10), note:val("pay-note")});
+      commit(); break;
+    }
+    case "pay-del": {
+      const en=S.entries.find(x=>x.id===S.modal.entryId); const w=en&&(en.workers||[]).find(x=>x.id===S.modal.workerId);
+      if(w&&w.payments){ const pid=t.getAttribute("data-pid"); w.payments=w.payments.filter(p=>p.id!==pid); commit(); } break;
+    }
+    case "save": saveEntry(); break;
+    case "cb-zoom": {
+      const pid=t.getAttribute("data-photo"); if(!pid) break;
+      getPhoto(pid).then(d=>{ if(!d) return;
+        const o=document.createElement("div"); o.className="photozoom";
+        o.innerHTML=`<img src="${d}" alt=""><button class="pzclose" aria-label="Close">${I.x}</button>`;
+        o.addEventListener("click",()=>o.remove());
+        document.body.appendChild(o);
+      }).catch(()=>{});
+      break;
+    }
+  }
+});
+document.addEventListener("input", e=>{
+  const t=e.target.closest("[data-a]"); if(!t) return;
+  if(t.getAttribute("data-a")==="search"){ S.search=t.value; render(); }
+});
+document.addEventListener("change", e=>{
+  const t=e.target.closest("[data-a]"); if(!t) return;
+  const a=t.getAttribute("data-a");
+  if(a==="cb-pickphoto"){ const file=t.files&&t.files[0]; if(!file) return; const row=+t.getAttribute("data-row");
+    resizeImage(file).then(d=>{ pendingCB[row]=d; populateCBPreviews(); }).catch(()=>{}); }
+  else if(a==="seasonFilter"){ S.filter=t.value; render(); }
+});
+
+async function saveEntry(){
+  const e=S.modal.data;
+  const dno=val("cb-dno");
+  const party=val("cb-party");
+  const date=val("cb-date");
+  const sizesEl=document.getElementById("cb-sizes");
+  const sizes=sizesEl? sizesEl.value.split("\n").map(s=>s.trim()).filter(Boolean):[];
+  const fabrics=[];
+  for(let i=0;i<fabRows;i++){ const name=val("cf-name-"+i); if(name) fabrics.push({name, avg:val("cf-avg-"+i)}); }
+  let year=Number(val("cb-year")); if(!year || year<2000 || year>3000) year=new Date().getFullYear();
+  const season=val("cb-season")||"Winter";
+  const colours=[];
+  for(let i=0;i<6;i++){
+    const name=val("cc-name-"+i); if(!name) continue;
+    const existing=(e.colours||[])[i];
+    const cid=(existing&&existing.id)||uid();
+    let hasPhoto=existing?existing.hasPhoto:false;
+    if(pendingCB[i]!==undefined){
+      if(typeof pendingCB[i]==="string"){ await putPhoto("cb:"+cid, pendingCB[i]); hasPhoto=true; }
+      else if(pendingCB[i]===null){ await delPhoto("cb:"+cid); hasPhoto=false; }
+    }
+    colours.push({id:cid, name, sets:Number(val("cc-sets-"+i))||0, hasPhoto});
+  }
+  const workers=[];
+  for(let i=0;i<workerRows;i++){ const name=val("wf-name-"+i); if(!name) continue;
+    const existing=(e.workers||[])[i];
+    workers.push({id:(existing&&existing.id)||uid(), role:val("wf-role-"+i), name, amount:Number(val("wf-amt-"+i))||0, payments:(existing&&existing.payments)||[]});
+  }
+  if(!dno && !party && !fabrics.length && !colours.length && !workers.length){ alert("Add at least a D.No, party, a fabric, a colour or a worker."); return; }
+  const rec={id:e.id||uid(), dno, party, date, year, season, sizes, fabrics, colours, workers};
+  if(e.id) S.entries=S.entries.map(x=>x.id===e.id?rec:x); else S.entries=[rec,...S.entries];
+  pendingCB={}; S.modal=null; commit();
+}
+
+function resizeImage(file,max=1200,q=0.8){
+  return new Promise((res,rej)=>{ const rd=new FileReader();
+    rd.onload=ev=>{ const img=new Image();
+      img.onload=()=>{ let w=img.width,h=img.height;
+        if(w>h&&w>max){h=h*max/w;w=max;} else if(h>=w&&h>max){w=w*max/h;h=max;}
+        const c=document.createElement("canvas"); c.width=w; c.height=h;
+        c.getContext("2d").drawImage(img,0,0,w,h); res(c.toDataURL("image/jpeg",q)); };
+      img.onerror=rej; img.src=ev.target.result; };
+    rd.onerror=rej; rd.readAsDataURL(file); });
+}
+
+/* backup / restore */
+async function doExport(){
+  const photos=await allPhotos();
+  const payload={app:"cutting-book",version:1,exportedAt:new Date().toISOString(),data:{entries:S.entries},photos};
+  const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});
+  const url=URL.createObjectURL(blob); const a=document.createElement("a");
+  const d=new Date(); const p=n=>String(n).padStart(2,"0");
+  const st=d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"_"+p(d.getHours())+p(d.getMinutes());
+  a.href=url; a.download="cutting-book-backup-"+st+".json"; a.click(); URL.revokeObjectURL(url);
+  alert("Backup saved — "+d.toLocaleString());
+}
+function doImport(){
+  const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json,.json";
+  inp.onchange=()=>{ const file=inp.files[0]; if(!file) return; const rd=new FileReader();
+    rd.onload=async ev=>{ try{
+      const p=JSON.parse(ev.target.result);
+      if(!p.data||!p.data.entries){ alert("This file isn't a Cutting Book backup."); return; }
+      if(!confirm("Restore this backup? It replaces the entire shared book for everyone.")) return;
+      S.entries=p.data.entries||[];
+      if(p.photos){ for(const k in p.photos) await putPhoto(k,p.photos[k]); }
+      S.modal=null; commit(); alert("Backup restored.");
+    }catch(err){ alert("Couldn't read that file."); } };
+    rd.readAsText(file); };
+  inp.click();
+}
+
+/* S starts empty; the Firestore listener (startBook) fills it after sign-in
+   and keeps every device live. Render once so the shell exists behind the gate. */
+render();
+</script>
+</body>
+</html>
